@@ -31,7 +31,7 @@ const app = express();
 //     orgin: 'http://localhost:3000'
 // };
 
-// app.use(cors(corsObject));
+app.use(cors());
 
 app.use(express.static('dist'));
 app.use(express.json());
