@@ -63,12 +63,6 @@ app.post("/api/persons", (request, response) => {
         });
     }
 
-    // if (persons.map(person => person.name).includes(body.name)) {
-    //     return response.status(400).json({
-    //         error: `${body.name} already exists in the phonebook`
-    //     });
-    // }
-
     const person = new Person({
         name: body.name,
         number: body.number,
@@ -77,6 +71,19 @@ app.post("/api/persons", (request, response) => {
     person.save().then(savedPerson => {
         response.json(savedPerson);
     });
+});
+
+app.put('/api/persons/:id', (request, response, next) => {
+    const body = request.body;
+
+    const person = {
+        name: body.name,
+        number: body.number
+    };
+
+    Person.findByIdAndUpdate(request.params.id, person, { new: true })
+        .then(updatedPerson => response.json(updatedPerson))
+        .catch(error => next(error));
 });
 
 const unkonwnEndpoint = (request, response) => {
