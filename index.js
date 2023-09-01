@@ -1,51 +1,17 @@
+require('dotenv').config();
+
 const express = require('express');
+const Person = require('./models/person');
 const morgan = require('morgan');
 const cors = require('cors');
 
-let persons = [
-    {
-        "id": 1,
-        "name": "Arto Hellas",
-        "number": "040-123456"
-    },
-    {
-        "id": 2,
-        "name": "Ada Lovelace",
-        "number": "39-44-5323523"
-    },
-    {
-        "id": 3,
-        "name": "Dan Abramov",
-        "number": "12-43-234345"
-    },
-    {
-        "id": 4,
-        "name": "Mary Poppendieck",
-        "number": "39-23-6423122"
-    }
-];
-
 const app = express();
-
-// const corsObject = {
-//     orgin: 'http://localhost:3000'
-// };
 
 app.use(cors());
 
 app.use(express.static('dist'));
 app.use(express.json());
 
-// function requestLogger(request, reponse, next) {
-//     console.log(`Method: ${request.method}`);
-//     console.log(`Path: ${request.path}`);
-//     console.log(`Body: ${request.body}`);
-//     next();
-// }
-
-// app.use(requestLogger);
-
-// app.use(morgan('tiny'));
 morgan.token('response', function (req, res) {
     return JSON.stringify(req.body)
 });
@@ -60,7 +26,10 @@ function generateId() {
     return maxId + 1;
 }
 app.get("/api/persons", (request, response) => {
-    response.json(persons);
+    Person.find({})
+        .then(persons => {
+            response.json(persons);
+        });
 });
 
 app.get("/api/info", (request, response) => {
@@ -72,14 +41,10 @@ app.get("/api/info", (request, response) => {
 });
 
 app.get("/api/persons/:id", (request, response) => {
-    const id = Number(request.params.id);
-
-    const person = persons.find(person => person.id === id);
-
-    if (!person) {
-        return response.status(404).end();
-    }
-    response.json(person);
+    Person.findById(request.params.id)
+        .then(person => {
+            response.json(person);
+        })
 });
 
 app.delete("/api/persons/:id", (request, response) => {
@@ -97,19 +62,20 @@ app.post("/api/persons", (request, response) => {
         });
     }
 
-    if (persons.map(person => person.name).includes(body.name)) {
-        return response.status(400).json({
-            error: `${body.name} already exists in the phonebook`
-        });
-    }
-    const person = {
+    // if (persons.map(person => person.name).includes(body.name)) {
+    //     return response.status(400).json({
+    //         error: `${body.name} already exists in the phonebook`
+    //     });
+    // }
+
+    const person = new Person({
         name: body.name,
         number: body.number,
-        id: generateId,
-    };
+    })
 
-    persons = persons.concat(person);
-    response.json(person);
+    person.save().then(savedPerson => {
+        response.json(savedPerson);
+    });
 });
 
 const unkonwnEndpoint = (request, response) => {
@@ -119,7 +85,7 @@ const unkonwnEndpoint = (request, response) => {
 }
 
 app.use(unkonwnEndpoint);
-const PORT = 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
     console.log(`app listening on port ${PORT}`)
 });
