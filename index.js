@@ -18,13 +18,6 @@ morgan.token('response', function (req, res) {
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :response'))
 
-function generateId() {
-    const maxId = persons.length > 0
-        ? Math.max(...persons.map(person => person.id))
-        : 0;
-
-    return maxId + 1;
-}
 app.get("/api/persons", (request, response) => {
     Person.find({})
         .then(persons => {
