@@ -45,6 +45,7 @@ app.get("/api/persons/:id", (request, response) => {
         .then(person => {
             response.json(person);
         })
+        .catch(error => next(error));
 });
 
 app.delete("/api/persons/:id", (request, response) => {
@@ -85,6 +86,21 @@ const unkonwnEndpoint = (request, response) => {
 }
 
 app.use(unkonwnEndpoint);
+
+const errorHandler = (error, request, response, next) => {
+    console.log(error);
+
+    if (error.name === 'CastError') {
+        response.status(400).send({
+            error: 'malformed id'
+        });
+    }
+
+    next(error);
+}
+
+app.use(errorHandler);
+
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
     console.log(`app listening on port ${PORT}`)
