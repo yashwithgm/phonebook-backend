@@ -25,9 +25,10 @@ app.get("/api/persons", (request, response) => {
         });
 });
 
-app.get("/api/info", (request, response) => {
+app.get("/api/info", async (request, response) => {
+    let peopleCount = await Person.estimatedDocumentCount();
     response.send(`
-        <p>Phonebook has info for ${persons.length} people</p>
+        <p>Phonebook has info for ${peopleCount} people</p>
 
         <p>${new Date().toString()}</p>
     `);
